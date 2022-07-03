@@ -135,6 +135,17 @@ var init = () => {
         };
     }
 
+    // menu
+    {
+        menu = theory.createUpgrade(9999, currency, new FreeCost());
+        menu.getDescription = (_) => "Open menu.";
+        menu.getInfo = (amount) => "Open menu"
+        menu.boughtOrRefunded = (_) => {
+            popup.show();
+            menu.level = 0;
+        };
+    }
+
     /////////////////////
     // Permanent Upgrades
     theory.createPublicationUpgrade(0, currency, 50);
@@ -210,6 +221,44 @@ var init = () => {
     
 
     updateAvailability();
+
+    // 2 Popups
+
+    var popup = ui.createPopup({
+        title: "Main",
+        content: ui.createStackLayout({
+            children: [
+                ui.createButton({text: "Start Know :)", horizontalOptions: LayoutOptions.START}),
+                ui.createLabel({text: "Change a id:"}),
+                ui.createEntry({placeholder:"Enter a id."}),
+                ui.createGrid({
+                    columnDefinitions: ["20*", "30*", "auto"],
+                    children: [
+                        ui.createButton({text: "Getting Started", row: 0, column: 0, onClicked: () => popup2.show()}),
+                        ui.createButton({text: "Fix", row: 0, column: 1}),
+                        ui.createButton({text: "Coming soon.", row: 0, column: 2}),
+                    ]
+                }),
+                ui.createLabel({text: "Change a progess:"}),
+                ui.createProgressBar({progress: 0.35}),
+                ui.createLatexLabel({text: "\\(d_1+1\\)"}),
+                ui.createButton({text: "Close", onClicked: () => popup.hide()})
+            ]
+        })
+    });
+
+    var popup2 = ui.createPopup({
+        title: "Getting started",
+        content: ui.createStackLayout({
+            children: [
+                ui.createLabel({text: "as while tap 250 times to dots 2."}),
+                ui.createLabel({text: "Result Formula:"}),
+                ui.createLatexLabel({text: "\\(\\rho = 0\\)"}),
+                ui.createLabel({text: "As Dots Know Here see now."}),
+                ui.createButton({text: "Close", onClicked: () => popup.hide()})
+            ]
+        })
+    });
 }
 
 var updateAvailability = () => {
