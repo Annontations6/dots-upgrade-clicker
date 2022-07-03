@@ -4,15 +4,17 @@ import { BigNumber } from "./api/BigNumber";
 import { theory } from "./api/Theory";
 import { Utils } from "./api/Utils";
 
-var id = "my_custom_theory_id";
-var name = "My Custom Theory";
+var id = "DUC";
+var name = "Dots Upgrade Clicker";
 var description = "A basic theory.";
-var authors = "Gilles-Philippe Paillé";
+var authors = "Annontations6";
 var version = 1;
 
 var currency;
 var c1, c2;
 var c1Exp, c2Exp;
+var dots_symbol = ["\u2800", "\u2801", "\u2802", "\u2803", "\u2804", "\u2805", "\u2806", "\u2807", "\u2808", "\u2809", "\u280A", "\u280B", "\u280C", "\u280D", "\u280E", "\u280F", "\u2810"]
+var dots_collect = [1, 5, 25, 125, 625, 3125, 15625, 78125, 390625, 1953125, 9765625, 48828125, 244140625, 1220703125, 6103515625, 30517578125, 152587890625]
 
 var achievement1, achievement2;
 var chapter1, chapter2;
@@ -23,45 +25,43 @@ var init = () => {
     ///////////////////
     // Regular Upgrades
 
-    // c1
+    // d1
     {
-        let getDesc = (level) => "c_1=" + getC1(level).toString(0);
-        c1 = theory.createUpgrade(0, currency, new FirstFreeCost(new ExponentialCost(15, Math.log2(2))));
-        c1.getDescription = (_) => Utils.getMath(getDesc(c1.level));
-        c1.getInfo = (amount) => Utils.getMathTo(getDesc(c1.level), getDesc(c1.level + amount));
+        d1 = theory.createUpgrade(0, currency, new FreeCost());
+        d1.getDescription = (_) => dots_symbol[0] + " | +" + dots_collect[0] + " | 0";
+        d1.getInfo = (amount) => dots_symbol[0] + " | +" + dots_collect[0] + " | 0"
+        d1.boughtOrRefunded = (_) => {
+            currency.value += BigNumber.from(dots_collect[0])
+            d1.level = 0;
+        };
     }
 
-    // c2
+    // d2
     {
-        let getDesc = (level) => "c_2=2^{" + level + "}";
-        let getInfo = (level) => "c_2=" + getC2(level).toString(0);
-        c2 = theory.createUpgrade(1, currency, new ExponentialCost(5, Math.log2(10)));
-        c2.getDescription = (_) => Utils.getMath(getDesc(c2.level));
-        c2.getInfo = (amount) => Utils.getMathTo(getInfo(c2.level), getInfo(c2.level + amount));
+        d2 = theory.createUpgrade(1, currency, new FreeCost());
+        d2.getDescription = (_) => dots_symbol[1] + " | +" + dots_collect[1] + " | 0";
+        d2.getInfo = (amount) => dots_symbol[1] + " | +" + dots_collect[1] + " | 0"
+        d2.boughtOrRefunded = (_) => {
+            currency.value += BigNumber.from(dots_collect[1])
+            d2.level = 0;
+        };
     }
 
     /////////////////////
     // Permanent Upgrades
-    theory.createPublicationUpgrade(0, currency, 1e10);
-    theory.createBuyAllUpgrade(1, currency, 1e13);
-    theory.createAutoBuyerUpgrade(2, currency, 1e30);
+    theory.createPublicationUpgrade(0, currency, 50);
+    theory.createBuyAllUpgrade(1, currency, BigNumber.from("ee99999"));
+    theory.createAutoBuyerUpgrade(2, currency, BigNumber.from("ee99999"));
 
     ///////////////////////
     //// Milestone Upgrades
-    theory.setMilestoneCost(new LinearCost(25, 25));
+    theory.setMilestoneCost(new LinearCost(Math.log10(250), Math.log10(6)));
 
     {
-        c1Exp = theory.createMilestoneUpgrade(0, 3);
-        c1Exp.description = Localization.getUpgradeIncCustomExpDesc("c_1", "0.05");
-        c1Exp.info = Localization.getUpgradeIncCustomExpInfo("c_1", "0.05");
-        c1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
-    }
-
-    {
-        c2Exp = theory.createMilestoneUpgrade(1, 3);
-        c2Exp.description = Localization.getUpgradeIncCustomExpDesc("c_2", "0.05");
-        c2Exp.info = Localization.getUpgradeIncCustomExpInfo("c_2", "0.05");
-        c2Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+        unlockD2 = theory.createMilestoneUpgrade(0, 1);
+        unlockD2.description = "Used dots 2.";
+        unlockD2.info = "Used dots 2.";
+        unlockD2.boughtOrRefunded = (_) => updateAvailability();
     }
     
     /////////////////
@@ -78,7 +78,7 @@ var init = () => {
 }
 
 var updateAvailability = () => {
-    c2Exp.isAvailable = c1Exp.level > 0;
+    d2.isAvailable = unlockD2.level > 0;
 }
 
 var tick = (elapsedTime, multiplier) => {
@@ -89,17 +89,7 @@ var tick = (elapsedTime, multiplier) => {
 }
 
 var getPrimaryEquation = () => {
-    let result = "\\dot{\\rho} = c_1";
-
-    if (c1Exp.level == 1) result += "^{1.05}";
-    if (c1Exp.level == 2) result += "^{1.1}";
-    if (c1Exp.level == 3) result += "^{1.15}";
-
-    result += "c_2";
-
-    if (c2Exp.level == 1) result += "^{1.05}";
-    if (c2Exp.level == 2) result += "^{1.1}";
-    if (c2Exp.level == 3) result += "^{1.15}";
+    let result = "\\dot{\\rho} = 0";
 
     return result;
 }
